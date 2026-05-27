@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DIRECT_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+
+  email        String   @unique
+  username     String   @unique
+
+  passwordHash String
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  blogPosts    BlogPost[]
+  resumes      Resume[]
+  projects     Project[]
+  settings     Settings?
+  media        Media[]
+}
+
+model BlogPost {
+  id        String   @id @default(cuid())
+
+  title     String
+  slug      String   @unique
+
+  excerpt   String?
+  content   String
+
+  published Boolean  @default(false)
+
+  coverImageId String?
+  coverImage   Media? @relation("BlogCoverImage", fields: [coverImageId], references: [id])
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ResumeSectionType {
+  experience
+  education
+  skills
+  projects
+  custom
+}
+
+model Resume {
+  id          String   @id @default(cuid())
+
+  title       String
+  slug        String   @unique
+
+  isDefault   Boolean  @default(false)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  sections    ResumeSection[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ResumeSection {
+  id        String   @id @default(cuid())
+
+  type      ResumeSectionType
+
+  title     String?
+
+  order     Int      @default(0)
+
+  content   Json
+
+  resumeId  String
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+
+  title       String
+  slug        String   @unique
+
+  excerpt     String?
+  description String
+
+  liveUrl     String?
+  repoUrl     String?
+
+  featured    Boolean  @default(false)
+  published   Boolean  @default(false)
+
+  thumbnailId String?
+  thumbnail   Media? @relation("ProjectThumbnail", fields: [thumbnailId], references: [id])
+
+  gallery     ProjectGalleryImage[]
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProjectGalleryImage {
+  id          String @id @default(cuid())
+
+  order       Int @default(0)
+
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  mediaId     String
+  media       Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([projectId, mediaId])
+}
+
+model Settings {
+  id String @id @default(cuid())
+
+  siteTitle       String
+  siteDescription String
+
+  heroTitle       String
+  heroSubtitle    String
+
+  about           String
+
+  githubUrl       String?
+  linkedinUrl     String?
+  twitterUrl      String?
+
+  contactEmail    String
+
+  resumeFileUrl   String?
+
+  availableForWork Boolean @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  userId          String @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  FILE
+}
+
+model Media {
+  id              String   @id @default(cuid())
+
+  url             String
+  key             String   @unique // storage key (important for deletion later)
+  type            MediaType
+  size            Int?
+
+  mimeType        String
+  originalName    String?
+
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  blogCoverImage BlogPost[] @relation("BlogCoverImage")
+  projectThumbnail Project[] @relation("ProjectThumbnail")
+  projectGalleryImages ProjectGalleryImage[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
