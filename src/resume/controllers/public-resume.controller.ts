@@ -1,16 +1,15 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { ResumeService } from '../resume.service';
 
-@Controller({
-  path: '',
-  version: '1',
-})
+@ApiTags('Resume')
+@Controller({ path: 'resume', version: '1' })
 export class PublicResumeController {
   constructor(private readonly resumeService: ResumeService) {}
 
-  @Get('resume')
-  findOne() {
-    return this.resumeService.getPublicResume();
+  @Get()
+  get() {
+    return this.resumeService.getPublicProfile();
   }
 }

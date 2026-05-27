@@ -9,12 +9,24 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { assertOwnership } from 'src/common/utils/ownership.util';
 import { MediaService } from 'src/media/media.service';
 
+const blogIncludes = {
+  coverImage: true,
+  tags: true,
+} as const;
+
 @Injectable()
 export class BlogService {
   constructor(
     private prisma: PrismaService,
     private readonly mediaService: MediaService,
   ) {}
+
+  private buildTagsConnect(names: string[]) {
+    return names.map((name) => ({
+      where: { slug: slugify(name, { lower: true, strict: true }) },
+      create: { name, slug: slugify(name, { lower: true, strict: true }) },
+    }));
+  }
 
   private async assertBlogOwnership(blogId: string, userId: string) {
     const blog = await this.prisma.blogPost.findUnique({
@@ -51,8 +63,11 @@ export class BlogService {
         published: dto.published ?? false,
         coverImageId: dto.coverImageId,
         userId,
+        tags: dto.tags?.length
+          ? { connectOrCreate: this.buildTagsConnect(dto.tags) }
+          : undefined,
       },
-      include: { coverImage: true },
+      include: blogIncludes,
     });
   }
 
@@ -72,8 +87,11 @@ export class BlogService {
         content: dto.content,
         published: dto.published,
         coverImageId: dto.coverImageId,
+        tags: dto.tags !== undefined
+          ? { set: [], connectOrCreate: this.buildTagsConnect(dto.tags) }
+          : undefined,
       },
-      include: { coverImage: true },
+      include: blogIncludes,
     });
   }
 
@@ -95,9 +113,7 @@ export class BlogService {
           published: true,
         },
 
-        include: {
-          coverImage: true,
-        },
+        include: blogIncludes,
 
         skip,
         take: limit,
@@ -128,7 +144,7 @@ export class BlogService {
   async getPublicBlogBySlug(slug: string) {
     const post = await this.prisma.blogPost.findUnique({
       where: { slug },
-      include: { coverImage: true },
+      include: blogIncludes,
     });
 
     if (!post || !post.published) {
@@ -149,9 +165,7 @@ export class BlogService {
         skip,
         take: limit,
 
-        include: {
-          coverImage: true,
-        },
+        include: blogIncludes,
 
         orderBy: {
           createdAt: 'desc',
@@ -175,9 +189,7 @@ export class BlogService {
   async findOnePrivate(slug: string) {
     return this.prisma.blogPost.findUniqueOrThrow({
       where: { slug },
-      include: {
-        coverImage: true,
-      },
+      include: blogIncludes,
     });
   }
 }

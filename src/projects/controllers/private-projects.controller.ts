@@ -10,6 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
 import { GetUser } from 'src/auth/decorators/current-user.decorator';
 import type { CurrentUser } from 'src/auth/types/current-user.type';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -21,6 +23,8 @@ import { CreateProjectDto } from '../dto/create-project.dto';
 import { UpdateProjectDto } from '../dto/update-project.dto';
 import { ProjectsService } from '../projects.service';
 
+@ApiTags('Projects (Dashboard)')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller({
   path: PRIVATE_API_PREFIX,

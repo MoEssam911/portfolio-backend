@@ -1,37 +1,32 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = 'admin@portfolio.com';
+  const email = process.env.SEED_EMAIL;
+  const password = process.env.SEED_PASSWORD;
+  const username = process.env.SEED_USERNAME ?? 'admin';
 
-  const existing = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (existing) {
-    console.log('Admin already exists');
-    return;
+  if (!email || !password) {
+    throw new Error('SEED_EMAIL and SEED_PASSWORD must be set in .env before seeding');
   }
 
-  const passwordHash = await bcrypt.hash('Admin12345', 10);
+  const passwordHash = await bcrypt.hash(password, 12);
 
-  await prisma.user.create({
-    data: {
-      email,
-      username: 'admin',
-      passwordHash,
-    },
+  const user = await prisma.user.upsert({
+    where: { email },
+    create: { email, username, passwordHash },
+    update: { passwordHash },
   });
 
-  console.log('Admin user created');
+  console.log(`Owner user ready: ${user.email} (id: ${user.id})`);
 }
 
 main()
-  .then(() => prisma.$disconnect())
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
-  });
+  })
+  .finally(() => prisma.$disconnect());

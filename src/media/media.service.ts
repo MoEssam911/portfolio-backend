@@ -81,6 +81,15 @@ export class MediaService {
     return media;
   }
 
+  async updateMedia(userId: string, id: string, dto: { alt?: string; caption?: string }) {
+    await this.getById(userId, id);
+
+    return this.prisma.media.update({
+      where: { id },
+      data: { alt: dto.alt, caption: dto.caption },
+    });
+  }
+
   async deleteMedia(userId: string, id: string) {
     const media = await this.prisma.media.findFirst({
       where: { id, userId },

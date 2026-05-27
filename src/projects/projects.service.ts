@@ -60,6 +60,7 @@ export class ProjectsService {
         repoUrl: dto.repoUrl,
         featured: dto.featured ?? false,
         published: dto.published ?? false,
+        technologies: dto.technologies ?? [],
         thumbnailId: dto.thumbnailId,
         userId,
         gallery: dto.galleryImageIds?.length
@@ -102,6 +103,7 @@ export class ProjectsService {
           repoUrl: dto.repoUrl,
           featured: dto.featured,
           published: dto.published,
+          technologies: dto.technologies,
           thumbnailId: dto.thumbnailId,
           gallery: dto.galleryImageIds?.length
             ? {

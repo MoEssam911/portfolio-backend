@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { BlogModule } from './blog/blog.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -8,6 +10,8 @@ import { ResumeModule } from './resume/resume.module';
 import { ProjectsModule } from './projects/projects.module';
 import { SettingsModule } from './settings/settings.module';
 import { MediaModule } from './media/media.module';
+import { TestimonialsModule } from './testimonials/testimonials.module';
+import { ServicesModule } from './services/services.module';
 
 import appConfig from './config/app.config';
 import jwtConfig from './config/jwt.config';
@@ -18,11 +22,17 @@ import { envValidationSchema } from './config/env.validation';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-
       load: [appConfig, jwtConfig, supabaseConfig],
-
       validationSchema: envValidationSchema,
     }),
+
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60_000,
+        limit: 100,
+      },
+    ]),
 
     PrismaModule,
     BlogModule,
@@ -31,8 +41,15 @@ import { envValidationSchema } from './config/env.validation';
     ProjectsModule,
     SettingsModule,
     MediaModule,
+    TestimonialsModule,
+    ServicesModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

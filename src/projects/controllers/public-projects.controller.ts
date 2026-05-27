@@ -1,9 +1,11 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 import { ProjectsService } from '../projects.service';
 
+@ApiTags('Projects')
 @Controller({
   path: '',
   version: '1',

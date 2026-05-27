@@ -19,11 +19,13 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  blogPosts    BlogPost[]
-  resumes      Resume[]
-  projects     Project[]
-  settings     Settings?
-  media        Media[]
+  blogPosts     BlogPost[]
+  resumeProfile ResumeProfile?
+  projects      Project[]
+  settings      Settings?
+  media         Media[]
+  testimonials  Testimonial[]
+  services      Service[]
 }
 
 model BlogPost {
@@ -40,6 +42,8 @@ model BlogPost {
   coverImageId String?
   coverImage   Media? @relation("BlogCoverImage", fields: [coverImageId], references: [id])
 
+  tags      Tag[]
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -47,44 +51,118 @@ model BlogPost {
   updatedAt DateTime @updatedAt
 }
 
-enum ResumeSectionType {
-  experience
-  education
-  skills
-  projects
-  custom
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  slug  String @unique
+
+  posts BlogPost[]
 }
 
-model Resume {
-  id          String   @id @default(cuid())
+model ResumeProfile {
+  id          String @id @default(cuid())
 
-  title       String
-  slug        String   @unique
+  headline    String?
+  summary     String?
+  location    String?
+  downloadUrl String?
 
-  isDefault   Boolean  @default(false)
+  userId      String        @unique
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  experiences    Experience[]
+  educations     Education[]
+  skillGroups    SkillGroup[]
+  certifications Certification[]
+  links          ResumeLink[]
 
-  sections    ResumeSection[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model ResumeSection {
-  id        String   @id @default(cuid())
+model Experience {
+  id        String        @id @default(cuid())
 
-  type      ResumeSectionType
+  company   String
+  title     String
+  location  String?
+  startDate DateTime
+  endDate   DateTime?
+  current   Boolean       @default(false)
+  bullets   String[]
 
-  title     String?
+  order     Int           @default(0)
 
-  order     Int      @default(0)
+  profileId String
+  profile   ResumeProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-  content   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-  resumeId  String
-  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+model Education {
+  id          String        @id @default(cuid())
+
+  school      String
+  degree      String
+  field       String?
+  startDate   DateTime?
+  endDate     DateTime?
+  current     Boolean       @default(false)
+  description String?
+
+  order       Int           @default(0)
+
+  profileId   String
+  profile     ResumeProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SkillGroup {
+  id        String        @id @default(cuid())
+
+  name      String
+  skills    String[]
+
+  order     Int           @default(0)
+
+  profileId String
+  profile   ResumeProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Certification {
+  id         String        @id @default(cuid())
+
+  name       String
+  issuer     String
+  issueDate  DateTime?
+  expiryDate DateTime?
+  url        String?
+
+  order      Int           @default(0)
+
+  profileId  String
+  profile    ResumeProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ResumeLink {
+  id        String        @id @default(cuid())
+
+  label     String
+  url       String
+
+  order     Int           @default(0)
+
+  profileId String
+  profile   ResumeProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,8 +177,10 @@ model Project {
   excerpt     String?
   description String
 
-  liveUrl     String?
-  repoUrl     String?
+  liveUrl      String?
+  repoUrl      String?
+
+  technologies String[]
 
   featured    Boolean  @default(false)
   published   Boolean  @default(false)
@@ -161,6 +241,47 @@ model Settings {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Testimonial {
+  id      String @id @default(cuid())
+
+  name    String
+  role    String
+  company String?
+  quote   String
+
+  avatarId String?
+  avatar   Media?  @relation("TestimonialAvatar", fields: [avatarId], references: [id])
+
+  featured  Boolean @default(false)
+  published Boolean @default(false)
+  order     Int     @default(0)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id          String @id @default(cuid())
+
+  title       String
+  description String
+  priceRange  String?
+  icon        String?
+
+  featured  Boolean @default(false)
+  published Boolean @default(false)
+  order     Int     @default(0)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum MediaType {
   IMAGE
   VIDEO
@@ -177,13 +298,16 @@ model Media {
 
   mimeType        String
   originalName    String?
+  alt             String?
+  caption         String?
 
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  blogCoverImage BlogPost[] @relation("BlogCoverImage")
-  projectThumbnail Project[] @relation("ProjectThumbnail")
+  blogCoverImage       BlogPost[]            @relation("BlogCoverImage")
+  projectThumbnail     Project[]             @relation("ProjectThumbnail")
   projectGalleryImages ProjectGalleryImage[]
+  testimonialAvatars   Testimonial[]         @relation("TestimonialAvatar")
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

@@ -1,6 +1,8 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -10,6 +12,20 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  /*
+    |--------------------------------------------------------------------------
+    | Security
+    |--------------------------------------------------------------------------
+  */
+
+  app.use(helmet());
+
+  app.enableCors({
+    origin: configService.get<string[]>('app.allowedOrigins'),
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  });
 
   /*
     |--------------------------------------------------------------------------
@@ -49,6 +65,24 @@ async function bootstrap() {
 
   // global interceptor
   app.useGlobalInterceptors(new TransformResponseInterceptor());
+
+  /*
+    |--------------------------------------------------------------------------
+    | Swagger (development only)
+    |--------------------------------------------------------------------------
+  */
+
+  if (configService.get<string>('app.env') !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Portfolio API')
+      .setDescription('Mohamed Essam — personal portfolio & CMS API')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   await app.listen(configService.get<number>('app.port', 4000));
 }

@@ -1,8 +1,10 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -11,14 +13,19 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
 import { GetUser } from 'src/auth/decorators/current-user.decorator';
 import type { CurrentUser } from 'src/auth/types/current-user.type';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { PRIVATE_API_PREFIX } from 'src/common/constants/routes.constant';
 
+import { UpdateMediaDto } from '../dto/update-media.dto';
 import { MediaService } from '../media.service';
 
+@ApiTags('Media (Dashboard)')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller({ path: PRIVATE_API_PREFIX, version: '1' })
 export class PrivateMediaController {
@@ -41,6 +48,15 @@ export class PrivateMediaController {
   @Get('media/:id')
   getOne(@GetUser() user: CurrentUser, @Param('id') id: string) {
     return this.mediaService.getById(user.id, id);
+  }
+
+  @Patch('media/:id')
+  update(
+    @GetUser() user: CurrentUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateMediaDto,
+  ) {
+    return this.mediaService.updateMedia(user.id, id, dto);
   }
 
   @Delete('media/:id')

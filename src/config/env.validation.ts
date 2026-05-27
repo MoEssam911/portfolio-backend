@@ -18,4 +18,6 @@ export const envValidationSchema = Joi.object({
   SUPABASE_SERVICE_ROLE_KEY: Joi.string().required(),
 
   SUPABASE_STORAGE_BUCKET: Joi.string().required(),
+
+  ALLOWED_ORIGINS: Joi.string().default('http://localhost:3000'),
 });

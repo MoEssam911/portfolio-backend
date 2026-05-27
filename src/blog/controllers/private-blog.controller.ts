@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { GetUser } from 'src/auth/decorators/current-user.decorator';
 import type { CurrentUser } from 'src/auth/types/current-user.type';
@@ -21,6 +22,8 @@ import { BlogService } from '../blog.service';
 import { CreateBlogDto } from '../dto/create-blog.dto';
 import { UpdateBlogDto } from '../dto/update-blog.dto';
 
+@ApiTags('Blog (Dashboard)')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller({
   path: PRIVATE_API_PREFIX,
