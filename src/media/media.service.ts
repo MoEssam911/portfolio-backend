@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import { PrismaService } from 'src/prisma/prisma.service';
+import { buildPaginationMeta } from 'src/common/utils/pagination.util';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -68,7 +69,10 @@ export class MediaService {
       this.prisma.media.count({ where: { userId } }),
     ]);
 
-    return { items, total, page, limit };
+    return {
+      data: items,
+      meta: buildPaginationMeta({ page, limit, total }),
+    };
   }
 
   async getById(userId: string, id: string) {

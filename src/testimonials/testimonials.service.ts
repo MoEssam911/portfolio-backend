@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from 'src/prisma/prisma.service';
+import { MediaService } from 'src/media/media.service';
 
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { ReorderTestimonialsDto } from './dto/reorder-testimonials.dto';
@@ -12,7 +13,10 @@ const testimonialIncludes = {
 
 @Injectable()
 export class TestimonialsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mediaService: MediaService,
+  ) {}
 
   getPublished() {
     return this.prisma.testimonial.findMany({
@@ -43,7 +47,11 @@ export class TestimonialsService {
     return testimonial;
   }
 
-  create(userId: string, dto: CreateTestimonialDto) {
+  async create(userId: string, dto: CreateTestimonialDto) {
+    if (dto.avatarId) {
+      await this.mediaService.validateOwnedMedia(dto.avatarId, userId);
+    }
+
     return this.prisma.testimonial.create({
       data: {
         userId,
@@ -61,6 +69,10 @@ export class TestimonialsService {
 
   async update(userId: string, id: string, dto: UpdateTestimonialDto) {
     await this.getOne(userId, id);
+
+    if (dto.avatarId) {
+      await this.mediaService.validateOwnedMedia(dto.avatarId, userId);
+    }
 
     return this.prisma.testimonial.update({
       where: { id },
