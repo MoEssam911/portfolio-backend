@@ -313,3 +313,22 @@ model Media {
   updatedAt       DateTime @updatedAt
 }
 
+// Public contact-form submissions. Site-wide (single owner), so no userId — the
+// dashboard lists every message. `delivered` records whether the email was sent;
+// `read` is for the dashboard inbox UI built later.
+model ContactMessage {
+  id        String   @id @default(cuid())
+
+  name      String
+  email     String
+  subject   String
+  message   String
+
+  delivered Boolean  @default(false)
+  read      Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+

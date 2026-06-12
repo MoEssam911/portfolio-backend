@@ -12,17 +12,19 @@ import { SettingsModule } from './settings/settings.module';
 import { MediaModule } from './media/media.module';
 import { TestimonialsModule } from './testimonials/testimonials.module';
 import { ServicesModule } from './services/services.module';
+import { ContactModule } from './contact/contact.module';
 
 import appConfig from './config/app.config';
 import jwtConfig from './config/jwt.config';
 import supabaseConfig from './config/supabase.config';
+import mailConfig from './config/mail.config';
 import { envValidationSchema } from './config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, jwtConfig, supabaseConfig],
+      load: [appConfig, jwtConfig, supabaseConfig, mailConfig],
       validationSchema: envValidationSchema,
     }),
 
@@ -43,6 +45,7 @@ import { envValidationSchema } from './config/env.validation';
     MediaModule,
     TestimonialsModule,
     ServicesModule,
+    ContactModule,
   ],
   controllers: [],
   providers: [

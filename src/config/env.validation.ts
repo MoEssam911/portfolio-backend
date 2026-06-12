@@ -1,7 +1,9 @@
 import * as Joi from 'joi';
 
 export const envValidationSchema = Joi.object({
-  NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  NODE_ENV: Joi.string()
+    .valid('development', 'production', 'test')
+    .default('development'),
 
   PORT: Joi.number().default(4000),
 
@@ -20,4 +22,12 @@ export const envValidationSchema = Joi.object({
   SUPABASE_STORAGE_BUCKET: Joi.string().required(),
 
   ALLOWED_ORIGINS: Joi.string().default('http://localhost:3000'),
+
+  // Contact form email delivery (Resend). All optional — without RESEND_API_KEY
+  // the contact endpoint returns delivered:false (frontend mailto: fallback).
+  RESEND_API_KEY: Joi.string().allow('').optional(),
+
+  MAIL_FROM: Joi.string().allow('').optional(),
+
+  CONTACT_TO: Joi.string().allow('').optional(),
 });
