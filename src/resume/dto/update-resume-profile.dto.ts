@@ -8,7 +8,9 @@ export class UpdateResumeProfileDto {
   @MaxLength(120)
   headline?: string;
 
-  @ApiPropertyOptional({ example: 'I build reliable backend systems with NestJS and Go.' })
+  @ApiPropertyOptional({
+    example: 'I build reliable backend systems with NestJS and Go.',
+  })
   @IsOptional()
   @IsString()
   summary?: string;

@@ -14,12 +14,16 @@ export class CreateProjectDto {
   @MinLength(3)
   title: string;
 
-  @ApiPropertyOptional({ example: 'A NestJS-powered personal portfolio backend' })
+  @ApiPropertyOptional({
+    example: 'A NestJS-powered personal portfolio backend',
+  })
   @IsOptional()
   @IsString()
   excerpt?: string;
 
-  @ApiProperty({ example: 'Full description of the project goals and architecture...' })
+  @ApiProperty({
+    example: 'Full description of the project goals and architecture...',
+  })
   @IsString()
   @MinLength(20)
   description: string;
@@ -55,7 +59,10 @@ export class CreateProjectDto {
   @IsString({ each: true })
   galleryImageIds?: string[];
 
-  @ApiPropertyOptional({ example: ['NestJS', 'Prisma', 'PostgreSQL'], type: [String] })
+  @ApiPropertyOptional({
+    example: ['NestJS', 'Prisma', 'PostgreSQL'],
+    type: [String],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

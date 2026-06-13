@@ -40,7 +40,10 @@ export class CreateExperienceDto {
   @IsBoolean()
   current?: boolean;
 
-  @ApiPropertyOptional({ example: ['Built REST APIs with NestJS', 'Reduced query time by 40%'], type: [String] })
+  @ApiPropertyOptional({
+    example: ['Built REST APIs with NestJS', 'Reduced query time by 40%'],
+    type: [String],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

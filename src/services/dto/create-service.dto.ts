@@ -14,7 +14,10 @@ export class CreateServiceDto {
   @MaxLength(150)
   title: string;
 
-  @ApiProperty({ example: 'I design and build production-grade REST APIs using NestJS, Prisma, and PostgreSQL.' })
+  @ApiProperty({
+    example:
+      'I design and build production-grade REST APIs using NestJS, Prisma, and PostgreSQL.',
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(2000)

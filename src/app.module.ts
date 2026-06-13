@@ -13,6 +13,7 @@ import { MediaModule } from './media/media.module';
 import { TestimonialsModule } from './testimonials/testimonials.module';
 import { ServicesModule } from './services/services.module';
 import { ContactModule } from './contact/contact.module';
+import { HealthModule } from './health/health.module';
 
 import appConfig from './config/app.config';
 import jwtConfig from './config/jwt.config';
@@ -46,6 +47,7 @@ import { envValidationSchema } from './config/env.validation';
     TestimonialsModule,
     ServicesModule,
     ContactModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [

@@ -1,6 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { buildPaginationMeta } from 'src/common/utils/pagination.util';
@@ -8,7 +12,7 @@ import { randomUUID } from 'crypto';
 
 @Injectable()
 export class MediaService {
-  private readonly supabase: SupabaseClient;
+  private readonly supabase: ReturnType<typeof createClient>;
   private readonly bucket: string;
 
   constructor(
@@ -85,7 +89,11 @@ export class MediaService {
     return media;
   }
 
-  async updateMedia(userId: string, id: string, dto: { alt?: string; caption?: string }) {
+  async updateMedia(
+    userId: string,
+    id: string,
+    dto: { alt?: string; caption?: string },
+  ) {
     await this.getById(userId, id);
 
     return this.prisma.media.update({

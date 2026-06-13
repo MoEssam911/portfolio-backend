@@ -21,17 +21,21 @@ export class UpdateSettingsDto {
   @MaxLength(160)
   siteDescription?: string;
 
-  @ApiPropertyOptional({ example: 'Hi, I\'m Mohamed' })
+  @ApiPropertyOptional({ example: "Hi, I'm Mohamed" })
   @IsOptional()
   @IsString()
   heroTitle?: string;
 
-  @ApiPropertyOptional({ example: 'Backend engineer & open source contributor' })
+  @ApiPropertyOptional({
+    example: 'Backend engineer & open source contributor',
+  })
   @IsOptional()
   @IsString()
   heroSubtitle?: string;
 
-  @ApiPropertyOptional({ example: 'I build backend systems with NestJS and Prisma.' })
+  @ApiPropertyOptional({
+    example: 'I build backend systems with NestJS and Prisma.',
+  })
   @IsOptional()
   @IsString()
   about?: string;

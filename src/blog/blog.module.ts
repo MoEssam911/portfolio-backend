@@ -6,7 +6,7 @@ import { BlogService } from './blog.service';
 import { MediaModule } from 'src/media/media.module';
 
 @Module({
-  imports: [ MediaModule],
+  imports: [MediaModule],
   controllers: [PublicBlogController, PrivateBlogController],
   providers: [BlogService],
 })

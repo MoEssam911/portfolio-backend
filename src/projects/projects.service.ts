@@ -45,7 +45,10 @@ export class ProjectsService {
     }
 
     if (dto.galleryImageIds?.length) {
-      await this.mediaService.validateOwnedMediaList(dto.galleryImageIds, userId);
+      await this.mediaService.validateOwnedMediaList(
+        dto.galleryImageIds,
+        userId,
+      );
     }
 
     const slug = slugify(dto.title, { lower: true, strict: true });
@@ -84,7 +87,10 @@ export class ProjectsService {
     }
 
     if (dto.galleryImageIds?.length) {
-      await this.mediaService.validateOwnedMediaList(dto.galleryImageIds, userId);
+      await this.mediaService.validateOwnedMediaList(
+        dto.galleryImageIds,
+        userId,
+      );
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -96,7 +102,9 @@ export class ProjectsService {
         where: { id },
         data: {
           title: dto.title,
-          slug: dto.title ? slugify(dto.title, { lower: true, strict: true }) : undefined,
+          slug: dto.title
+            ? slugify(dto.title, { lower: true, strict: true })
+            : undefined,
           excerpt: dto.excerpt,
           description: dto.description,
           liveUrl: dto.liveUrl,

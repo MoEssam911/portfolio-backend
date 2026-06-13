@@ -240,7 +240,11 @@ export class ResumeService {
     });
   }
 
-  async updateCertification(userId: string, id: string, dto: UpdateCertificationDto) {
+  async updateCertification(
+    userId: string,
+    id: string,
+    dto: UpdateCertificationDto,
+  ) {
     await this.assertCertificationOwnership(userId, id);
 
     return this.prisma.certification.update({

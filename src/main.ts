@@ -1,6 +1,7 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 
@@ -10,8 +11,18 @@ import { TransformResponseInterceptor } from './common/interceptors/transform-re
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
+
+  /*
+    |--------------------------------------------------------------------------
+    | Proxy
+    |--------------------------------------------------------------------------
+    | Render terminates TLS at its edge proxy. Trust the first proxy hop so
+    | req.ip (used by the throttler) and req.protocol reflect the real client.
+  */
+
+  app.set('trust proxy', 1);
 
   /*
     |--------------------------------------------------------------------------
@@ -84,7 +95,8 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  await app.listen(configService.get<number>('app.port', 4000));
+  // Bind to 0.0.0.0 so Render's proxy can reach the container on the injected PORT.
+  await app.listen(configService.get<number>('app.port', 4000), '0.0.0.0');
 }
 
 void bootstrap();

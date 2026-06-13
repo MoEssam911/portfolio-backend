@@ -26,7 +26,10 @@ export class CreateTestimonialDto {
   @MaxLength(100)
   company?: string;
 
-  @ApiProperty({ example: 'Mohamed delivered the project ahead of schedule and the code quality was exceptional.' })
+  @ApiProperty({
+    example:
+      'Mohamed delivered the project ahead of schedule and the code quality was exceptional.',
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(1000)

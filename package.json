@@ -5,8 +5,13 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "build": "nest build",
+    "postinstall": "prisma generate",
+    "prisma:deploy": "prisma migrate deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "feature": "nest g res",
     "start": "nest start",

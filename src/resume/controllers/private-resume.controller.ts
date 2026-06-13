@@ -45,14 +45,20 @@ export class PrivateResumeController {
   }
 
   @Patch('resume')
-  updateProfile(@GetUser() user: CurrentUser, @Body() dto: UpdateResumeProfileDto) {
+  updateProfile(
+    @GetUser() user: CurrentUser,
+    @Body() dto: UpdateResumeProfileDto,
+  ) {
     return this.resumeService.updateProfile(user.id, dto);
   }
 
   // ─── Experiences ────────────────────────────────────────────────────────────
 
   @Post('resume/experiences')
-  createExperience(@GetUser() user: CurrentUser, @Body() dto: CreateExperienceDto) {
+  createExperience(
+    @GetUser() user: CurrentUser,
+    @Body() dto: CreateExperienceDto,
+  ) {
     return this.resumeService.createExperience(user.id, dto);
   }
 
@@ -78,7 +84,10 @@ export class PrivateResumeController {
   // ─── Education ──────────────────────────────────────────────────────────────
 
   @Post('resume/educations')
-  createEducation(@GetUser() user: CurrentUser, @Body() dto: CreateEducationDto) {
+  createEducation(
+    @GetUser() user: CurrentUser,
+    @Body() dto: CreateEducationDto,
+  ) {
     return this.resumeService.createEducation(user.id, dto);
   }
 
@@ -104,7 +113,10 @@ export class PrivateResumeController {
   // ─── Skill Groups ───────────────────────────────────────────────────────────
 
   @Post('resume/skill-groups')
-  createSkillGroup(@GetUser() user: CurrentUser, @Body() dto: CreateSkillGroupDto) {
+  createSkillGroup(
+    @GetUser() user: CurrentUser,
+    @Body() dto: CreateSkillGroupDto,
+  ) {
     return this.resumeService.createSkillGroup(user.id, dto);
   }
 
@@ -130,7 +142,10 @@ export class PrivateResumeController {
   // ─── Certifications ─────────────────────────────────────────────────────────
 
   @Post('resume/certifications')
-  createCertification(@GetUser() user: CurrentUser, @Body() dto: CreateCertificationDto) {
+  createCertification(
+    @GetUser() user: CurrentUser,
+    @Body() dto: CreateCertificationDto,
+  ) {
     return this.resumeService.createCertification(user.id, dto);
   }
 

@@ -82,14 +82,17 @@ export class BlogService {
       where: { id },
       data: {
         title: dto.title,
-        slug: dto.title ? slugify(dto.title, { lower: true, strict: true }) : undefined,
+        slug: dto.title
+          ? slugify(dto.title, { lower: true, strict: true })
+          : undefined,
         excerpt: dto.excerpt,
         content: dto.content,
         published: dto.published,
         coverImageId: dto.coverImageId,
-        tags: dto.tags !== undefined
-          ? { set: [], connectOrCreate: this.buildTagsConnect(dto.tags) }
-          : undefined,
+        tags:
+          dto.tags !== undefined
+            ? { set: [], connectOrCreate: this.buildTagsConnect(dto.tags) }
+            : undefined,
       },
       include: blogIncludes,
     });
