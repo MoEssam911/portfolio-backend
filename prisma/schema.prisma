@@ -124,7 +124,8 @@ model SkillGroup {
   id        String        @id @default(cuid())
 
   name      String
-  skills    String[]
+  icon      String?
+  skills    Json[]
 
   order     Int           @default(0)
 

@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
+
+type InputJsonValue = Prisma.InputJsonValue;
 
 import { CreateCertificationDto } from './dto/create-certification.dto';
 import { CreateEducationDto } from './dto/create-education.dto';
@@ -182,7 +185,8 @@ export class ResumeService {
       data: {
         profileId: profile.id,
         name: dto.name,
-        skills: dto.skills,
+        icon: dto.icon,
+        skills: dto.skills as unknown as InputJsonValue[],
         order: dto.order ?? 0,
       },
     });
@@ -195,7 +199,8 @@ export class ResumeService {
       where: { id },
       data: {
         name: dto.name,
-        skills: dto.skills,
+        icon: dto.icon,
+        skills: dto.skills as unknown as InputJsonValue[],
         order: dto.order,
       },
     });

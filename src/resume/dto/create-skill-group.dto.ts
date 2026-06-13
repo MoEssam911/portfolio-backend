@@ -1,13 +1,29 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
   IsInt,
   IsOptional,
   IsString,
+  MaxLength,
   Min,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+
+export class SkillItemDto {
+  @ApiProperty({ example: 'TypeScript' })
+  @IsString()
+  @MinLength(1)
+  name: string;
+
+  @ApiPropertyOptional({ example: 'logos:typescript-icon' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  icon?: string;
+}
 
 export class CreateSkillGroupDto {
   @ApiProperty({ example: 'Languages' })
@@ -15,11 +31,18 @@ export class CreateSkillGroupDto {
   @MinLength(1)
   name: string;
 
-  @ApiProperty({ example: ['TypeScript', 'Go', 'SQL'], type: [String] })
+  @ApiPropertyOptional({ example: 'lucide:code' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  icon?: string;
+
+  @ApiProperty({ type: [SkillItemDto] })
   @IsArray()
   @ArrayMinSize(1)
-  @IsString({ each: true })
-  skills: string[];
+  @ValidateNested({ each: true })
+  @Type(() => SkillItemDto)
+  skills: SkillItemDto[];
 
   @ApiPropertyOptional({ example: 0 })
   @IsOptional()
