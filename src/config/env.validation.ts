@@ -15,11 +15,13 @@ export const envValidationSchema = Joi.object({
 
   JWT_EXPIRES_IN: Joi.string().default('7d'),
 
-  SUPABASE_URL: Joi.string().required(),
+  CLOUDINARY_CLOUD_NAME: Joi.string().required(),
 
-  SUPABASE_SERVICE_ROLE_KEY: Joi.string().required(),
+  CLOUDINARY_API_KEY: Joi.string().required(),
 
-  SUPABASE_STORAGE_BUCKET: Joi.string().required(),
+  CLOUDINARY_API_SECRET: Joi.string().required(),
+
+  CLOUDINARY_FOLDER: Joi.string().default('portfolio/develop'),
 
   ALLOWED_ORIGINS: Joi.string().default('http://localhost:3000'),
 

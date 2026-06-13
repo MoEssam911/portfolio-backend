@@ -4,54 +4,49 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient } from '@supabase/supabase-js';
+import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { buildPaginationMeta } from 'src/common/utils/pagination.util';
-import { randomUUID } from 'crypto';
 
 @Injectable()
 export class MediaService {
-  private readonly supabase: ReturnType<typeof createClient>;
-  private readonly bucket: string;
+  private readonly folder: string;
 
   constructor(
     private readonly prisma: PrismaService,
     configService: ConfigService,
   ) {
-    this.supabase = createClient(
-      configService.getOrThrow<string>('supabase.url'),
-      configService.getOrThrow<string>('supabase.serviceRoleKey'),
-    );
+    cloudinary.config({
+      cloud_name: configService.getOrThrow<string>('storage.cloudName'),
+      api_key: configService.getOrThrow<string>('storage.apiKey'),
+      api_secret: configService.getOrThrow<string>('storage.apiSecret'),
+    });
 
-    this.bucket = configService.getOrThrow<string>('supabase.bucket');
+    this.folder = configService.getOrThrow<string>('storage.folder');
   }
 
   async uploadFile(userId: string, file: Express.Multer.File) {
     this.validateFile(file);
 
-    const fileExtension = file.originalname.split('.').pop();
+    let result: UploadApiResponse;
 
-    const key = `media/${userId}/${randomUUID()}.${fileExtension}`;
-
-    const { error } = await this.supabase.storage
-      .from(this.bucket)
-      .upload(key, file.buffer, {
-        contentType: file.mimetype,
-        upsert: false,
-      });
-
-    if (error) {
-      throw new BadRequestException(error.message);
+    try {
+      result = await this.uploadToCloudinary(
+        file.buffer,
+        `${this.folder}/${userId}`,
+      );
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : 'File upload failed',
+      );
     }
-
-    const { data } = this.supabase.storage.from(this.bucket).getPublicUrl(key);
 
     return this.prisma.media.create({
       data: {
         userId,
-        key,
-        url: data.publicUrl,
+        key: result.public_id,
+        url: result.secure_url,
         size: file.size,
         mimeType: file.mimetype,
         originalName: file.originalname,
@@ -111,12 +106,15 @@ export class MediaService {
       throw new NotFoundException('Media not found');
     }
 
-    const { error } = await this.supabase.storage
-      .from(this.bucket)
-      .remove([media.key]);
-
-    if (error) {
-      throw new BadRequestException(error.message);
+    try {
+      await cloudinary.uploader.destroy(media.key, {
+        resource_type: this.getResourceType(media.mimeType),
+        invalidate: true,
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : 'Failed to delete file',
+      );
     }
 
     await this.prisma.media.delete({
@@ -128,6 +126,42 @@ export class MediaService {
     return {
       success: true,
     };
+  }
+
+  /**
+   * Streams a Multer memory buffer to Cloudinary. resource_type 'auto' lets
+   * Cloudinary detect images vs. PDFs; both are stored under the 'image'
+   * resource type so the persisted public_id has no extension to reconstruct.
+   */
+  private uploadToCloudinary(
+    buffer: Buffer,
+    folder: string,
+  ): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder,
+          resource_type: 'auto',
+          use_filename: true,
+          unique_filename: true,
+        },
+        (error, result) => {
+          if (error) {
+            reject(new Error(error.message || 'Cloudinary upload failed'));
+            return;
+          }
+
+          if (!result) {
+            reject(new Error('Cloudinary upload returned no result'));
+            return;
+          }
+
+          resolve(result);
+        },
+      );
+
+      uploadStream.end(buffer);
+    });
   }
 
   private validateFile(file: Express.Multer.File) {
@@ -155,6 +189,20 @@ export class MediaService {
     }
 
     return 'FILE';
+  }
+
+  /**
+   * Cloudinary resource_type used when destroying an asset. Derived from the
+   * stored mimeType so we never need to persist it: images and PDFs are both
+   * uploaded under the 'image' resource type (Cloudinary rasterizes PDFs),
+   * anything else falls back to 'raw'.
+   */
+  private getResourceType(mimeType: string): 'image' | 'raw' {
+    if (mimeType.startsWith('image/') || mimeType === 'application/pdf') {
+      return 'image';
+    }
+
+    return 'raw';
   }
 
   async validateOwnedMedia(mediaId: string, userId: string) {

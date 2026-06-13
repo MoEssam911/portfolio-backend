@@ -17,7 +17,7 @@ import { HealthModule } from './health/health.module';
 
 import appConfig from './config/app.config';
 import jwtConfig from './config/jwt.config';
-import supabaseConfig from './config/supabase.config';
+import storageConfig from './config/storage.config';
 import mailConfig from './config/mail.config';
 import { envValidationSchema } from './config/env.validation';
 
@@ -25,7 +25,7 @@ import { envValidationSchema } from './config/env.validation';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, jwtConfig, supabaseConfig, mailConfig],
+      load: [appConfig, jwtConfig, storageConfig, mailConfig],
       validationSchema: envValidationSchema,
     }),
 
