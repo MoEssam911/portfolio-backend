@@ -1,0 +1,36 @@
+# Everything here is excluded from the build context sent to Docker, so it
+# never lands in the image. Keeps builds fast and avoids leaking secrets.
+
+# Installed deps — the image installs its own, clean, from the lockfile.
+node_modules
+
+# Build output — the builder stage regenerates this inside the image.
+dist
+
+# Secrets — never bake .env files into an image. They're injected at runtime
+# (Render env vars, or docker-compose env_file for local testing).
+.env
+.env.*
+
+# Git internals and history.
+.git
+.gitignore
+
+# Test/coverage artifacts.
+coverage
+test
+
+# Editor / OS noise.
+.vscode
+.idea
+.DS_Store
+
+# Docker files themselves and docs don't belong inside the image.
+Dockerfile
+.dockerignore
+docker-compose.yml
+*.md
+
+# Logs and local tooling.
+*.log
+npm-debug.log*

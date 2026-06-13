@@ -1,0 +1,26 @@
+# Local-only convenience for testing the production Docker image on your
+# machine. Run:  docker compose up --build
+# Then hit:      http://localhost:4000/api/v1/health
+#
+# This builds the SAME Dockerfile Render will use in the cloud, and feeds it
+# your existing local .env. Your .env points DIRECT_URL/DATABASE_URL at your
+# Neon (cloud) Postgres, so no local database container is needed — the app
+# talks to the same DB it always does. (Heads up: the container's start command
+# runs `prisma migrate deploy` against that DB. If there are unapplied
+# migrations they WILL be applied to your real dev database.)
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Load your real local secrets/config (DIRECT_URL, DATABASE_URL, JWT_SECRET,
+    # Cloudinary keys, etc.). This file is gitignored and never enters the image.
+    env_file:
+      - .env
+    # Map host port 4000 -> container port 4000. The container listens on
+    # whatever PORT your .env sets (defaults to 4000 in the image).
+    ports:
+      - "4000:4000"
+    # Restart if it crashes (e.g. a transient DB hiccup), but not endlessly.
+    restart: unless-stopped
